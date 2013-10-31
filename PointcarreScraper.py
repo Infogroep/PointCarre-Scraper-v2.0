@@ -1,7 +1,17 @@
 #!/usr/bin/env python
-import mechanize
-from getpass import getpass
+import mechanize, platform
 import lxml.html, os
+import sys
+
+Platform = platform.system
+
+## import function depending on os
+## rename function when on windows for implementation reasons
+
+if Platform == 'Windows':
+        from getpass import win_getpass as getpass
+else:
+        from getpass import getpass
 
 def login(user, password):
 	agent = mechanize.Browser()
@@ -74,46 +84,58 @@ departments = [5] # 5 = WE; 7 = IR
 standard_url_dep = "http://pointcarre.vub.ac.be/index.php?application=curriculum&go=curriculum_total_programs_browser&curriculum_department="
 departments_urls = [standard_url_dep + str(num) for num in departments] # URL's Genereren voor de agent.
 
-agent = login(raw_input('Username: '), getpass())
+## Dirty hack to enforce command line use
+## use of command line is more secure as it is able to hide the password
+if len(sys.argv) != 2:
+        ## python file is hard coded witch is ugly and bad
+        os.system('python PointcarreScraper.py terminal')
+elif sys.argv[1] == 'terminal':
 
-## Total Programs ophalen van elk departement.
-total_programs = set()
-for url in departments_urls:
-        total_programs.update(scrapeDepartment(agent, url))
+        agent = login(raw_input('Username: '), getpass())
 
-print "TOTAL PROGRAMS:"
-for p in total_programs:
-        print p
+        ## Total Programs ophalen van elk departement.
+        total_programs = set()
+        for url in departments_urls:
+                total_programs.update(scrapeDepartment(agent, url))
 
-#standard_url_tprogram = "https://pointcarre.vub.ac.be/index.php?application=curriculum&go=curriculum_programs_browser&curriculum_total_program="
-#standard_url_tprogram = "http://pointcarre.vub.ac.be/index.php?curriculum_total_program_browser_table_direction=4&curriculum_total_program_browser_table_page_nr=1&curriculum_total_program_browser_table_column=1&application=curriculum&go=curriculum_total_programs_browser&curriculum_total_program_browser_table_per_page=all&curriculum_department="
-#Kwintens Fix
-standard_url_tprogram = "http://pointcarre.vub.ac.be/index.php?application=curriculum&go=curriculum_programs_browser&curriculum_total_program_browser_table_per_page=all&curriculum_total_program="
+        print "TOTAL PROGRAMS:"
+        for p in total_programs:
+                print p
 
-total_program_urls = [standard_url_tprogram + str(num) for num in total_programs]
+        #standard_url_tprogram = "https://pointcarre.vub.ac.be/index.php?application=curriculum&go=curriculum_programs_browser&curriculum_total_program="
+        #standard_url_tprogram = "http://pointcarre.vub.ac.be/index.php?curriculum_total_program_browser_table_direction=4&curriculum_total_program_browser_table_page_nr=1&curriculum_total_program_browser_table_column=1&application=curriculum&go=curriculum_total_programs_browser&curriculum_total_program_browser_table_per_page=all&curriculum_department="
+        #Kwintens Fix
+        standard_url_tprogram = "http://pointcarre.vub.ac.be/index.php?application=curriculum&go=curriculum_programs_browser&curriculum_total_program_browser_table_per_page=all&curriculum_total_program="
 
-## Programs ophalen voor elk Total Program
-programs = set()
-for url in total_program_urls:
-        print url
-        programs.update(scrapeTotalProgram(agent, url))
+        total_program_urls = [standard_url_tprogram + str(num) for num in total_programs]
 
-print "PROGRAMS:"
-for tp in programs:
-        print tp
+        ## Programs ophalen voor elk Total Program
+        programs = set()
+        for url in total_program_urls:
+                print url
+                programs.update(scrapeTotalProgram(agent, url))
 
-# standard_url_program = "http://pointcarre.vub.ac.be/index.php?application=curriculum&go=curriculum_program_viewer&curriculum_program="
-standard_url_program = "http://pointcarre.vub.ac.be/index.php?curriculum_student_browser_table_direction=4&curriculum_student_browser_table_page_nr=1&curriculum_student_browser_table_column=1&application=curriculum&go=curriculum_program_viewer&curriculum_student_browser_table_per_page=all&curriculum_program="
-program_urls = [standard_url_program + str(num) for num in programs]
+        print "PROGRAMS:"
+        for tp in programs:
+                print tp
 
-emails = set()
-for url in program_urls:
-        # print "Trying: " + url
-        emails.update(scrapeRichting(agent, url))
+        # standard_url_program = "http://pointcarre.vub.ac.be/index.php?application=curriculum&go=curriculum_program_viewer&curriculum_program="
+        standard_url_program = "http://pointcarre.vub.ac.be/index.php?curriculum_student_browser_table_direction=4&curriculum_student_browser_table_page_nr=1&curriculum_student_browser_table_column=1&application=curriculum&go=curriculum_program_viewer&curriculum_student_browser_table_per_page=all&curriculum_program="
+        program_urls = [standard_url_program + str(num) for num in programs]
 
-print "E-MAILS:"
-for e in emails:
-        print e
+        emails = set()
+        for url in program_urls:
+                # print "Trying: " + url
+                emails.update(scrapeRichting(agent, url))
+
+        print "E-MAILS:"
+        for e in emails:
+                print e
+
+        raw_input('Press enter to close' )
+
+
+
 
 #--------------
 
