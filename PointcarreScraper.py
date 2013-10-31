@@ -88,6 +88,7 @@ departments_urls = [standard_url_dep + str(num) for num in departments] # URL's 
 ## use of command line is more secure as it is able to hide the password
 if len(sys.argv) != 2:
         ## python file is hard coded witch is ugly and bad
+        print 'starting new terminal'
         os.system('python PointcarreScraper.py terminal')
 elif sys.argv[1] == 'terminal':
 
@@ -128,9 +129,13 @@ elif sys.argv[1] == 'terminal':
                 # print "Trying: " + url
                 emails.update(scrapeRichting(agent, url))
 
-        print "E-MAILS:"
+#        print "E-MAILS:"
+        result_file = open("result.txt", "w")
         for e in emails:
-                print e
+#                print e
+                result_file.write(e + "\n") # linebreak
+
+        result_file.close()
 
         raw_input('Press enter to close' )
 
