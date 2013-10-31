@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import mechanize
 from getpass import getpass
-import lxml.html
+import lxml.html, os
 
 def login(user, password):
 	agent = mechanize.Browser()
@@ -23,9 +23,11 @@ def scrapeDepartment(agent, url):
         
         total_program_ids = []
         for row in rows:
+                departement = row.xpath('td[1]/text()')
                 row = row.xpath('td[2]/div/ul/li/a/@href')
                 if len(row) > 0:
                         index = row[0].rfind('=')
+                        print departement, row[0][index+1:]
                         total_program_ids.append(row[0][index+1:])
         
         return total_program_ids
@@ -84,7 +86,10 @@ for p in total_programs:
         print p
 
 #standard_url_tprogram = "https://pointcarre.vub.ac.be/index.php?application=curriculum&go=curriculum_programs_browser&curriculum_total_program="
-standard_url_tprogram = "http://pointcarre.vub.ac.be/index.php?curriculum_total_program_browser_table_direction=4&curriculum_total_program_browser_table_page_nr=1&curriculum_total_program_browser_table_column=1&application=curriculum&go=curriculum_total_programs_browser&curriculum_total_program_browser_table_per_page=all&curriculum_department="
+#standard_url_tprogram = "http://pointcarre.vub.ac.be/index.php?curriculum_total_program_browser_table_direction=4&curriculum_total_program_browser_table_page_nr=1&curriculum_total_program_browser_table_column=1&application=curriculum&go=curriculum_total_programs_browser&curriculum_total_program_browser_table_per_page=all&curriculum_department="
+#Kwintens Fix
+standard_url_tprogram = "http://pointcarre.vub.ac.be/index.php?application=curriculum&go=curriculum_programs_browser&curriculum_total_program_browser_table_per_page=all&curriculum_total_program="
+
 total_program_urls = [standard_url_tprogram + str(num) for num in total_programs]
 
 ## Programs ophalen voor elk Total Program
