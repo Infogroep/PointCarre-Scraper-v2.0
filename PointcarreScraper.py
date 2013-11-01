@@ -98,7 +98,6 @@ if len(sys.argv) != 2:
 elif sys.argv[1] == 'terminal':
 
         try:
-                print test
                 agent = login(raw_input('Username: '), getpass())
 
                 ## Total Programs ophalen van elk departement.
