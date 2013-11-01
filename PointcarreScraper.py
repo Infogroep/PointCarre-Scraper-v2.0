@@ -25,7 +25,7 @@ def login(user, password):
 
 # Scrapet de "Department"-pagina voor de verschillende "Total Program" nummers.
 def scrapeDepartment(agent, url):
-        print url
+        print "scrapeDepartment"
         agent.open(url)
         rawResponse = agent.response().read()
         html = lxml.html.fromstring(rawResponse)
@@ -36,14 +36,15 @@ def scrapeDepartment(agent, url):
                 departement = row.xpath('td[1]/text()')
                 row = row.xpath('td[2]/div/ul/li/a/@href')
                 if len(row) > 0:
-                        index = row[0].rfind('=')
-                        print departement, row[0][index+1:]
-                        total_program_ids.append(row[0][index+1:])
+##                        index = row[0].rfind('=')
+                        print departement, row[0] + "&curriculum_total_program_browser_table_per_page=all"
+                        total_program_ids.append(row[0] + "&curriculum_total_program_browser_table_per_page=all" )
         
         return total_program_ids
 
 # Scrape de "Total Program"-pagina voor de verschillende "Programs".
 def scrapeTotalProgram(agent, url):
+        print "scrapeTotalProgram"
         agent.open(url)
         rawResponse = agent.response().read()
         html = lxml.html.fromstring(rawResponse)
@@ -51,27 +52,31 @@ def scrapeTotalProgram(agent, url):
 
         program_ids = []
         for row in rows:
+                program = row.xpath('td[1]/a/text()')
                 row = row.xpath('td[1]/a/@href')
                 if len(row) > 0:
-                        index = row[0].rfind('=')
-                        program_ids.append(row[0][index+1:])
+##                        index = row[0].rfind('=')
+                        print program, row[0] + "&curriculum_student_browser_table_per_page=all"
+                        program_ids.append(row[0] + "&curriculum_student_browser_table_per_page=all")
 
         return program_ids
 
 # 
 def scrapeRichting(agent, url):
-	agent.open(url)
-	rawResponse = agent.response().read()
-	html = lxml.html.fromstring(rawResponse)
-	rows = html.xpath('//table[@id="curriculum_student_browser_table"]/tbody/tr')
+        print "scrapeRichting"
+        agent.open(url)
+        rawResponse = agent.response().read()
+        html = lxml.html.fromstring(rawResponse)
+        rows = html.xpath('//table[@id="curriculum_student_browser_table"]/tbody/tr')
 
-	netids = []
-	for row in rows:
-		row = row.xpath('td[4]/text()')
-		if len(row) > 0:
-			netids.append(row[0] + '@vub.ac.be')
+        netids = []
+        for row in rows:
+                richting = row.xpath('td[1]/text()')
+                row = row.xpath('td[4]/text()')
+                if len(row) > 0:
+                        netids.append(row[0] + '@vub.ac.be')
 	
-	return netids
+        return netids
 
 ## standard_url = "http://pointcarre.vub.ac.be/index.php?curriculum_student_browser_table_direction=4&curriculum_student_browser_table_page_nr=1&curriculum_student_browser_table_column=1&application=curriculum&go=curriculum_program_viewer&curriculum_student_browser_table_per_page=all&curriculum_program="
  
@@ -81,7 +86,7 @@ def scrapeRichting(agent, url):
 ## We beslissen welke departementen we willen scrapen.
 ## Dit is voorlopig manueel.
 departments = [5] # 5 = WE; 7 = IR
-standard_url_dep = "http://pointcarre.vub.ac.be/index.php?application=curriculum&go=curriculum_total_programs_browser&curriculum_department="
+standard_url_dep = "http://pointcarre.vub.ac.be/index.php?application=curriculum&go=curriculum_total_programs_browser&curriculum_total_program_browser_table_per_page=all&curriculum_department="
 departments_urls = [standard_url_dep + str(num) for num in departments] # URL's Genereren voor de agent.
 
 ## Dirty hack to enforce command line use
@@ -99,16 +104,17 @@ elif sys.argv[1] == 'terminal':
         for url in departments_urls:
                 total_programs.update(scrapeDepartment(agent, url))
 
-        print "TOTAL PROGRAMS:"
-        for p in total_programs:
-                print p
+##        print "TOTAL PROGRAMS:"
+##        for p in total_programs:
+##                print p
 
         #standard_url_tprogram = "https://pointcarre.vub.ac.be/index.php?application=curriculum&go=curriculum_programs_browser&curriculum_total_program="
         #standard_url_tprogram = "http://pointcarre.vub.ac.be/index.php?curriculum_total_program_browser_table_direction=4&curriculum_total_program_browser_table_page_nr=1&curriculum_total_program_browser_table_column=1&application=curriculum&go=curriculum_total_programs_browser&curriculum_total_program_browser_table_per_page=all&curriculum_department="
         #Kwintens Fix
         standard_url_tprogram = "http://pointcarre.vub.ac.be/index.php?application=curriculum&go=curriculum_programs_browser&curriculum_total_program_browser_table_per_page=all&curriculum_total_program="
 
-        total_program_urls = [standard_url_tprogram + str(num) for num in total_programs]
+##        total_program_urls = [standard_url_tprogram + str(num) for num in total_programs]
+        total_program_urls = total_programs
 
         ## Programs ophalen voor elk Total Program
         programs = set()
@@ -116,20 +122,21 @@ elif sys.argv[1] == 'terminal':
                 print url
                 programs.update(scrapeTotalProgram(agent, url))
 
-        print "PROGRAMS:"
-        for tp in programs:
-                print tp
+#        print "PROGRAMS:"
+#        for tp in programs:
+#                print tp
 
         # standard_url_program = "http://pointcarre.vub.ac.be/index.php?application=curriculum&go=curriculum_program_viewer&curriculum_program="
-        standard_url_program = "http://pointcarre.vub.ac.be/index.php?curriculum_student_browser_table_direction=4&curriculum_student_browser_table_page_nr=1&curriculum_student_browser_table_column=1&application=curriculum&go=curriculum_program_viewer&curriculum_student_browser_table_per_page=all&curriculum_program="
-        program_urls = [standard_url_program + str(num) for num in programs]
+##        standard_url_program = "http://pointcarre.vub.ac.be/index.php?curriculum_student_browser_table_direction=4&curriculum_student_browser_table_page_nr=1&curriculum_student_browser_table_column=1&application=curriculum&go=curriculum_program_viewer&curriculum_student_browser_table_per_page=all&curriculum_program="
+##        program_urls = [standard_url_program + str(num) for num in programs]
+        program_urls = programs
 
         emails = set()
         for url in program_urls:
-                # print "Trying: " + url
+#                print "Trying: " + url
                 emails.update(scrapeRichting(agent, url))
 
-#        print "E-MAILS:"
+        print "E-MAILS:"
         result_file = open("result.txt", "w")
         for e in emails:
 #                print e
@@ -137,8 +144,7 @@ elif sys.argv[1] == 'terminal':
 
         result_file.close()
 
-        raw_input('Press enter to close' )
-
+        raw_input('Press enter to close')
 
 
 
